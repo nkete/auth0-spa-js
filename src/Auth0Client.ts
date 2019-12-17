@@ -77,7 +77,13 @@ export default class Auth0Client {
     code_challenge: string,
     redirect_uri: string
   ): AuthorizeOptions {
-    const { domain, leeway, useRefreshTokens, ...withoutDomain } = this.options;
+    const {
+      domain,
+      leeway,
+      useRefreshTokens,
+      cacheStrategy,
+      ...withoutDomain
+    } = this.options;
     return {
       ...withoutDomain,
       ...authorizeOptions,
@@ -131,7 +137,13 @@ export default class Auth0Client {
   public async buildAuthorizeUrl(
     options: RedirectLoginOptions = {}
   ): Promise<string> {
-    const { redirect_uri, appState, ...authorizeOptions } = options;
+    const {
+      redirect_uri,
+      appState,
+      cacheStrategy,
+      ...authorizeOptions
+    } = options;
+
     const stateIn = encodeState(createRandomString());
     const nonceIn = createRandomString();
     const code_verifier = createRandomString();
@@ -187,6 +199,7 @@ export default class Auth0Client {
     const code_verifier = createRandomString();
     const code_challengeBuffer = await sha256(code_verifier);
     const code_challenge = bufferToBase64UrlEncoded(code_challengeBuffer);
+
     const params = this._getParams(
       authorizeOptions,
       stateIn,
@@ -194,29 +207,38 @@ export default class Auth0Client {
       code_challenge,
       this.options.redirect_uri || window.location.origin
     );
+
     const url = this._authorizeUrl({
       ...params,
       response_mode: 'web_message'
     });
+
     const codeResult = await runPopup(popup, url, config);
+
     if (stateIn !== codeResult.state) {
       throw new Error('Invalid state');
     }
+
     const authResult = await oauthToken({
       baseUrl: this.domainUrl,
       audience: options.audience || this.options.audience,
       client_id: this.options.client_id,
       code_verifier,
-      code: codeResult.code
-    });
+      code: codeResult.code,
+      grant_type: 'authorization_code'
+    } as OAuthTokenOptions);
+
     const decodedToken = this._verifyIdToken(authResult.id_token, nonceIn);
+
     const cacheEntry = {
       ...authResult,
       decodedToken,
       scope: params.scope,
       audience: params.audience || 'default'
     };
+
     this.cache.save(cacheEntry);
+
     ClientStorage.save('auth0.is.authenticated', true, { daysUntilExpire: 1 });
   }
 
@@ -310,8 +332,9 @@ export default class Auth0Client {
       audience: this.options.audience,
       client_id: this.options.client_id,
       code_verifier: transaction.code_verifier,
-      code
-    });
+      code,
+      grant_type: 'authorization_code'
+    } as OAuthTokenOptions);
 
     const decodedToken = this._verifyIdToken(
       authResult.id_token,
@@ -371,7 +394,9 @@ export default class Auth0Client {
         }
       }
 
-      const authResult = await this._getTokenFromIFrame(options);
+      const authResult = this.options.useRefreshTokens
+        ? await this._getTokenUsingRefreshToken(options)
+        : await this._getTokenFromIFrame(options);
 
       this.cache.save(authResult);
 
@@ -499,8 +524,9 @@ export default class Auth0Client {
       audience: options.audience || this.options.audience,
       client_id: this.options.client_id,
       code_verifier,
-      code: codeResult.code
-    });
+      code: codeResult.code,
+      grant_type: 'authorization_code'
+    } as OAuthTokenOptions);
 
     const decodedToken = this._verifyIdToken(tokenResult.id_token, nonceIn);
 
@@ -509,6 +535,31 @@ export default class Auth0Client {
       decodedToken,
       scope: params.scope,
       audience: params.audience || 'default'
+    };
+  }
+
+  private async _getTokenUsingRefreshToken(
+    options: GetTokenSilentlyOptions
+  ): Promise<any> {
+    const cache = this.cache.get({
+      scope: options.scope,
+      audience: options.audience || 'default'
+    });
+
+    const tokenResult = await oauthToken({
+      baseUrl: this.domainUrl,
+      client_id: this.options.client_id,
+      grant_type: 'refresh_token',
+      refresh_token: cache.refresh_token
+    } as RefreshTokenOptions);
+
+    const decodedToken = this._verifyIdToken(tokenResult.id_token);
+
+    return {
+      ...tokenResult,
+      decodedToken,
+      scope: options.scope,
+      audience: options.audience || 'default'
     };
   }
 }

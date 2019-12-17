@@ -15,6 +15,7 @@ interface CacheEntry {
   decodedToken: DecodedToken;
   audience: string;
   scope: string;
+  refresh_token?: string;
 }
 
 interface CachedTokens {
