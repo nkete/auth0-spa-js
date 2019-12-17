@@ -450,7 +450,6 @@ describe('Auth0', () => {
       expect(utils.getUniqueScopes).toHaveBeenCalledWith(
         'openid profile email',
         undefined,
-        undefined,
         undefined
       );
 
@@ -477,9 +476,8 @@ describe('Auth0', () => {
 
       expect(utils.getUniqueScopes).toHaveBeenCalledWith(
         'openid profile email',
-        undefined,
-        undefined,
-        'offline_access'
+        'offline_access',
+        undefined
       );
 
       expect(utils.createQueryParams).toHaveBeenCalledWith({
@@ -1075,6 +1073,7 @@ describe('Auth0', () => {
       const decodedToken = await auth0.getIdTokenClaims();
       expect(decodedToken).toBeUndefined();
     });
+
     it('returns full decoded token if there is a cache entry', async () => {
       const { auth0, cache } = await setup();
       const userIn = {
@@ -1091,32 +1090,87 @@ describe('Auth0', () => {
       const userOut = await auth0.getIdTokenClaims();
       expect(userOut).toEqual(userIn.decodedToken.claims);
     });
-    it('uses default options', async () => {
-      const { auth0, utils, cache } = await setup();
-      await auth0.getIdTokenClaims();
-      expect(cache.get).toHaveBeenCalledWith({
-        audience: 'default',
-        scope: TEST_SCOPES
+
+    describe('when using refresh tokens', () => {
+      it('uses default options with offine_access', async () => {
+        const { auth0, utils, cache } = await setup({
+          useRefreshTokens: true
+        });
+
+        await auth0.getIdTokenClaims();
+
+        expect(cache.get).toHaveBeenCalledWith({
+          audience: 'default',
+          scope: TEST_SCOPES
+        });
+
+        expect(utils.getUniqueScopes).toHaveBeenCalledWith(
+          'openid profile email',
+          'offline_access',
+          'offline_access'
+        );
       });
-      expect(utils.getUniqueScopes).toHaveBeenCalledWith(
-        'openid profile email',
-        'openid profile email'
-      );
+
+      it('uses custom options when provided with offline_access', async () => {
+        const { auth0, utils, cache } = await setup({
+          useRefreshTokens: true
+        });
+
+        await auth0.getIdTokenClaims({
+          audience: 'the-audience',
+          scope: 'the-scope'
+        });
+
+        expect(cache.get).toHaveBeenCalledWith({
+          audience: 'the-audience',
+          scope: TEST_SCOPES
+        });
+
+        expect(utils.getUniqueScopes).toHaveBeenCalledWith(
+          'openid profile email',
+          'offline_access',
+          'the-scope'
+        );
+      });
     });
-    it('uses custom options when provided', async () => {
-      const { auth0, utils, cache } = await setup();
-      await auth0.getIdTokenClaims({
-        audience: 'the-audience',
-        scope: 'the-scope'
+
+    describe('when not using refresh tokens', () => {
+      it('uses default options', async () => {
+        const { auth0, utils, cache } = await setup();
+
+        await auth0.getIdTokenClaims();
+
+        expect(cache.get).toHaveBeenCalledWith({
+          audience: 'default',
+          scope: TEST_SCOPES
+        });
+
+        expect(utils.getUniqueScopes).toHaveBeenCalledWith(
+          'openid profile email',
+          undefined,
+          'openid profile email'
+        );
       });
-      expect(cache.get).toHaveBeenCalledWith({
-        audience: 'the-audience',
-        scope: TEST_SCOPES
+
+      it('uses custom options when provided', async () => {
+        const { auth0, utils, cache } = await setup();
+
+        await auth0.getIdTokenClaims({
+          audience: 'the-audience',
+          scope: 'the-scope'
+        });
+
+        expect(cache.get).toHaveBeenCalledWith({
+          audience: 'the-audience',
+          scope: TEST_SCOPES
+        });
+
+        expect(utils.getUniqueScopes).toHaveBeenCalledWith(
+          'openid profile email',
+          undefined,
+          'the-scope'
+        );
       });
-      expect(utils.getUniqueScopes).toHaveBeenCalledWith(
-        'openid profile email',
-        'the-scope'
-      );
     });
   });
 
@@ -1152,9 +1206,10 @@ describe('Auth0', () => {
             audience: 'default',
             scope: TEST_SCOPES
           });
+
           expect(utils.getUniqueScopes).toHaveBeenCalledWith(
             'openid profile email',
-            'openid profile email',
+            undefined,
             undefined
           );
         });
@@ -1199,6 +1254,7 @@ describe('Auth0', () => {
           utils.getUniqueScopes.mockReturnValue(
             `${TEST_SCOPES} offline_access`
           );
+
           cache.get.mockReturnValue({ access_token: TEST_ACCESS_TOKEN });
 
           await auth0.getTokenSilently();
@@ -1210,8 +1266,8 @@ describe('Auth0', () => {
 
           expect(utils.getUniqueScopes).toHaveBeenCalledWith(
             'openid profile email',
-            'openid profile email',
-            'offline_access'
+            'offline_access',
+            undefined
           );
         });
 
@@ -1262,6 +1318,7 @@ describe('Auth0', () => {
         });
       });
     });
+
     describe('when `options.ignoreCache` is true', () => {
       const defaultOptionsIgnoreCacheTrue: GetTokenSilentlyOptions = {
         audience: 'test:audience',
@@ -1292,6 +1349,7 @@ describe('Auth0', () => {
         await auth0.getTokenSilently(defaultOptionsIgnoreCacheTrue);
         expect(utils.encodeState).toHaveBeenCalledWith(TEST_RANDOM_STRING);
       });
+
       it('creates `code_challenge` by using `utils.sha256` with the result of `utils.createRandomString`', async () => {
         const { auth0, utils } = await setup();
 
@@ -1301,10 +1359,12 @@ describe('Auth0', () => {
           TEST_ARRAY_BUFFER
         );
       });
+
       it('creates correct query params', async () => {
         const { auth0, utils } = await setup();
 
         await auth0.getTokenSilently(defaultOptionsIgnoreCacheTrue);
+
         expect(utils.createQueryParams).toHaveBeenCalledWith({
           audience: defaultOptionsIgnoreCacheTrue.audience,
           client_id: TEST_CLIENT_ID,
@@ -1319,6 +1379,7 @@ describe('Auth0', () => {
           code_challenge_method: 'S256'
         });
       });
+
       it('creates correct query params without leeway', async () => {
         const { auth0, utils } = await setup({ leeway: 10 });
 
@@ -1337,6 +1398,7 @@ describe('Auth0', () => {
           code_challenge_method: 'S256'
         });
       });
+
       it('creates correct query params when providing a default redirect_uri', async () => {
         const redirect_uri = 'https://custom-redirect-uri/callback';
         const { auth0, utils } = await setup({
@@ -1380,8 +1442,8 @@ describe('Auth0', () => {
 
         expect(utils.getUniqueScopes).toHaveBeenCalledWith(
           'openid profile email',
-          defaultOptionsIgnoreCacheTrue.scope,
-          undefined
+          undefined,
+          defaultOptionsIgnoreCacheTrue.scope
         );
       });
 
@@ -1638,7 +1700,9 @@ describe('default creation function', () => {
 
   it('calls getTokenSilently if there is a storage item with key `auth0.is.authenticated`', async () => {
     Auth0Client.prototype.getTokenSilently = jest.fn();
+
     require('../src/storage').get = () => true;
+
     const auth0 = await createAuth0Client({
       domain: TEST_DOMAIN,
       client_id: TEST_CLIENT_ID
@@ -1646,25 +1710,68 @@ describe('default creation function', () => {
 
     expect(auth0.getTokenSilently).toHaveBeenCalledWith({
       audience: undefined,
-      ignoreCache: true,
-      scope: undefined
+      ignoreCache: true
     });
   });
-  it('calls getTokenSilently with audience and scope', async () => {
-    const options = {
-      audience: 'the-audience',
-      scope: 'the-scope'
-    };
-    Auth0Client.prototype.getTokenSilently = jest.fn();
-    require('../src/storage').get = () => true;
-    const auth0 = await createAuth0Client({
-      domain: TEST_DOMAIN,
-      client_id: TEST_CLIENT_ID,
-      ...options
+
+  describe('when refresh tokens are not used', () => {
+    it('calls getTokenSilently with audience and scope', async () => {
+      const utils = require('../src/utils');
+
+      const options = {
+        audience: 'the-audience',
+        scope: 'the-scope'
+      };
+
+      Auth0Client.prototype.getTokenSilently = jest.fn();
+
+      require('../src/storage').get = () => true;
+      utils.getUniqueScopes = jest.fn(() => options.scope);
+
+      const auth0 = await createAuth0Client({
+        domain: TEST_DOMAIN,
+        client_id: TEST_CLIENT_ID,
+        ...options
+      });
+
+      expect(auth0.getTokenSilently).toHaveBeenCalledWith({
+        ignoreCache: true,
+        ...options
+      });
     });
-    expect(auth0.getTokenSilently).toHaveBeenCalledWith({
-      ignoreCache: true,
-      ...options
+  });
+
+  describe('when refresh tokens are used', () => {
+    it('creates the client with the correct scopes', async () => {
+      const utils = require('../src/utils');
+
+      const options = {
+        audience: 'the-audience',
+        scope: 'the-scope',
+        useRefreshTokens: true
+      };
+
+      Auth0Client.prototype.getTokenSilently = jest.fn();
+
+      require('../src/storage').get = () => true;
+      utils.getUniqueScopes = jest.fn(() => `${options.scope} offline_access`);
+
+      const auth0 = await createAuth0Client({
+        domain: TEST_DOMAIN,
+        client_id: TEST_CLIENT_ID,
+        ...options
+      });
+
+      expect(utils.getUniqueScopes).toHaveBeenCalledWith(
+        'the-scope',
+        'offline_access'
+      );
+
+      expect(auth0.getTokenSilently).toHaveBeenCalledWith({
+        ignoreCache: true,
+        scope: 'the-scope offline_access',
+        audience: 'the-audience'
+      });
     });
   });
 });

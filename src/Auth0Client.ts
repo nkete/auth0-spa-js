@@ -90,8 +90,7 @@ export default class Auth0Client {
       scope: getUniqueScopes(
         this.DEFAULT_SCOPE,
         this.options.scope,
-        authorizeOptions.scope,
-        this.options.useRefreshTokens ? 'offline_access' : undefined
+        authorizeOptions.scope
       ),
       response_type: 'code',
       response_mode: 'query',
@@ -278,8 +277,14 @@ export default class Auth0Client {
       scope: this.options.scope || this.DEFAULT_SCOPE
     }
   ) {
-    options.scope = getUniqueScopes(this.DEFAULT_SCOPE, options.scope);
+    options.scope = getUniqueScopes(
+      this.DEFAULT_SCOPE,
+      this.options.scope,
+      options.scope
+    );
+
     const cache = this.cache.get(options);
+
     return cache && cache.decodedToken.claims;
   }
 
@@ -366,18 +371,17 @@ export default class Auth0Client {
    *
    * @param options
    */
-  public async getTokenSilently(
-    options: GetTokenSilentlyOptions = {
+  public async getTokenSilently(options: GetTokenSilentlyOptions = {}) {
+    options = {
       audience: this.options.audience,
-      scope: this.options.scope || this.DEFAULT_SCOPE,
-      ignoreCache: false
-    }
-  ) {
-    options.scope = getUniqueScopes(
-      this.DEFAULT_SCOPE,
-      options.scope,
-      this.options.useRefreshTokens ? 'offline_access' : undefined
-    );
+      scope: getUniqueScopes(
+        this.DEFAULT_SCOPE,
+        this.options.scope,
+        options.scope
+      ),
+      ignoreCache: false,
+      ...options
+    };
 
     try {
       await lock.acquireLock(GET_TOKEN_SILENTLY_LOCK_KEY, 5000);
@@ -553,7 +557,11 @@ export default class Auth0Client {
       refresh_token: cache.refresh_token
     } as RefreshTokenOptions);
 
+    console.log(tokenResult);
+
     const decodedToken = this._verifyIdToken(tokenResult.id_token);
+
+    console.log(decodedToken);
 
     return {
       ...tokenResult,
