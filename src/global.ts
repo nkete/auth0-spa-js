@@ -96,6 +96,12 @@ interface Auth0ClientOptions extends BaseLoginOptions {
    * The default setting is `memory`.
    */
   cacheStrategy?: 'memory' | 'localstorage';
+
+  /**
+   * If true, refresh tokens are used to fetch new access tokens from the Auth0 server.
+   * The default setting is 'false'.
+   */
+  useRefreshTokens?: boolean;
 }
 
 /**
