@@ -19,7 +19,6 @@ export declare const createQueryParams: (params: any) => string;
 export declare const sha256: (s: string) => Promise<any>;
 export declare const urlDecodeB64: (input: string) => string;
 export declare const bufferToBase64UrlEncoded: (input: any) => string;
-export declare const userinfo: () => Promise<any>;
 export declare const oauthToken: ({
   baseUrl,
   ...options

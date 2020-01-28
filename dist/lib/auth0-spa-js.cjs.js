@@ -2181,6 +2181,37 @@ var runIframe = function(authorizeUrl, eventOrigin) {
     iframe.setAttribute('src', authorizeUrl);
   });
 };
+var openPopup = function() {
+  var popup = window.open(
+    '',
+    'auth0:authorize:popup',
+    'left=100,top=100,width=400,height=600,resizable,scrollbars=yes,status=1'
+  );
+  if (!popup) {
+    throw new Error('Could not open popup');
+  }
+  return popup;
+};
+var runPopup = function(popup, authorizeUrl, config) {
+  popup.location.href = authorizeUrl;
+  return new Promise(function(resolve, reject) {
+    var timeoutId = setTimeout(function() {
+      reject(__assign(__assign({}, TIMEOUT_ERROR), { popup: popup }));
+    }, (config.timeoutInSeconds || DEFAULT_AUTHORIZE_TIMEOUT_IN_SECONDS) *
+      1000);
+    window.addEventListener('message', function(e) {
+      if (!e.data || e.data.type !== 'authorization_response') {
+        return;
+      }
+      clearTimeout(timeoutId);
+      popup.close();
+      if (e.data.response.error) {
+        return reject(e.data.response);
+      }
+      resolve(e.data.response);
+    });
+  });
+};
 var createRandomString = function() {
   var charset =
     '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_~.';
@@ -2281,7 +2312,6 @@ var getJSON = function(url, options) {
           return [4 /*yield*/, fetch(url, options)];
         case 1:
           response = _b.sent();
-          console.log('>>> GET JSON::response:', response);
           if (!response.ok && response.status === 429) {
             e = new Error('to_many_requests');
             e.error_description = 'To Many Requests';
@@ -2302,28 +2332,6 @@ var getJSON = function(url, options) {
             throw e;
           }
           return [2 /*return*/, success];
-      }
-    });
-  });
-};
-var userinfo = function() {
-  return __awaiter(void 0, void 0, void 0, function() {
-    return __generator(this, function(_a) {
-      switch (_a.label) {
-        case 0:
-          return [
-            4 /*yield*/,
-            getJSON('https://nkete.eu.auth0.com/userinfo', {
-              method: 'GET',
-              headers: {
-                'Content-type': 'application/json',
-                Authorization:
-                  'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik5rUTVNa05HT0VJMVJUZEdORUUyTVRZNFF6TXhORVUyUmtZeU1EUTVSa0ZFTnpKQk1UTTNSUSJ9.eyJodHRwczovL3Rlc3QuY29tL29yZ2FuaXNhdGlvbiI6ImRlZmF1bHQiLCJodHRwczovL3Rlc3QuY29tL2VtYWlsIjoibmVqYy5rZXRlQGRsYWJzLnNpIiwiaXNzIjoiaHR0cHM6Ly9ua2V0ZS5ldS5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NWRhZGE4YjA0MzJiYjMwZTE5YjkzYTBlIiwiYXVkIjpbImh0dHBzOi8vdGVzdC5hcGkuY29tIiwiaHR0cHM6Ly9ua2V0ZS5ldS5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNTgwMTE4NTE3LCJleHAiOjE1ODAyMDQ5MTcsImF6cCI6ImtSV1F4SldhUkg4ZVJjdjFpRVNrNHRDSGY5cmJiS3VBIiwic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSBlbWFpbCJ9.uzIHXh0Ei8u7ISiUEoBCXh9mvwq6WmL5017t__sQYvixTSENabLiHu1YKa9_tN7uG6lFMP2tZdmrPsZ2QzYbhQzanocIBvvrhbsmyynt87K1jctcoddtXGB_i2cpaZQowxE90arKJyaLTOtmt9-L3MQudXoEEczrgh5n-xDKCBgf9Ou7Dq6vC9svoWf0I9BLQV6Kbf0K9KEqHCVtg_v2Kn_lRtdqeCPTmIzPFE5rupnnsfpNwJmZNeu1Rs8KNkSH79DdO0Oa8gqRuKMOo2DJcZKUZqAkU15KeosgBdzR4pbm6VbkJH8rsLxZXzFVDZCVQfEe-pgnXoSFxxNwHF4IDw'
-              }
-            })
-          ];
-        case 1:
-          return [2 /*return*/, _a.sent()];
       }
     });
   });
@@ -2837,21 +2845,76 @@ var Auth0Client = /** @class */ (function() {
    * @param options
    */
   Auth0Client.prototype.loginWithPopup = function(options, config) {
+    if (options === void 0) {
+      options = {};
+    }
+    if (config === void 0) {
+      config = DEFAULT_POPUP_CONFIG_OPTIONS;
+    }
     return __awaiter(this, void 0, void 0, function() {
-      var res, err_1;
+      var popup,
+        authorizeOptions,
+        stateIn,
+        nonceIn,
+        code_verifier,
+        code_challengeBuffer,
+        code_challenge,
+        params,
+        url,
+        codeResult,
+        authResult,
+        decodedToken,
+        cacheEntry;
       return __generator(this, function(_a) {
         switch (_a.label) {
           case 0:
-            _a.trys.push([0, 2, , 3]);
-            return [4 /*yield*/, userinfo()];
+            return [4 /*yield*/, openPopup()];
           case 1:
-            res = _a.sent();
-            return [3 /*break*/, 3];
+            popup = _a.sent();
+            authorizeOptions = __rest(options, []);
+            stateIn = encodeState(createRandomString());
+            nonceIn = createRandomString();
+            code_verifier = createRandomString();
+            return [4 /*yield*/, sha256(code_verifier)];
           case 2:
-            err_1 = _a.sent();
-            console.log('>>> ERROR Auth0Client: ', err_1);
-            throw err_1;
+            code_challengeBuffer = _a.sent();
+            code_challenge = bufferToBase64UrlEncoded(code_challengeBuffer);
+            params = this._getParams(
+              authorizeOptions,
+              stateIn,
+              nonceIn,
+              code_challenge,
+              this.options.redirect_uri || window.location.origin
+            );
+            url = this._authorizeUrl(
+              __assign(__assign({}, params), { response_mode: 'web_message' })
+            );
+            return [4 /*yield*/, runPopup(popup, url, config)];
           case 3:
+            codeResult = _a.sent();
+            if (stateIn !== codeResult.state) {
+              throw new Error('Invalid state');
+            }
+            return [
+              4 /*yield*/,
+              oauthToken({
+                baseUrl: this.domainUrl,
+                audience: options.audience || this.options.audience,
+                client_id: this.options.client_id,
+                code_verifier: code_verifier,
+                code: codeResult.code
+              })
+            ];
+          case 4:
+            authResult = _a.sent();
+            decodedToken = this._verifyIdToken(authResult.id_token, nonceIn);
+            cacheEntry = __assign(__assign({}, authResult), {
+              decodedToken: decodedToken,
+              scope: params.scope,
+              audience: params.audience || 'default'
+            });
+            this.cache.save(cacheEntry);
+            save('auth0.is.authenticated', true, { daysUntilExpire: 1 });
             return [2 /*return*/];
         }
       });
