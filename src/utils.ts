@@ -175,7 +175,6 @@ export const bufferToBase64UrlEncoded = input => {
 
 const getJSON = async (url, options) => {
   const response = await fetch(url, options);
-  console.log('>>> GET JSON::response:', response);
 
   if (!response.ok && response.status === 429) {
     const e = <any>new Error('to_many_requests');
