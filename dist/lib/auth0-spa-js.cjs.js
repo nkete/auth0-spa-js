@@ -2690,7 +2690,7 @@ var AuthenticationError = /** @class */ (function(_super) {
   return AuthenticationError;
 })(Error);
 
-var version = '1.6.2';
+var version = '1.6.3';
 
 var lock = new Lock();
 var GET_TOKEN_SILENTLY_LOCK_KEY = 'auth0.lock.getTokenSilently';
@@ -2821,7 +2821,8 @@ var Auth0Client = /** @class */ (function() {
               code_verifier: code_verifier,
               appState: appState,
               scope: params.scope,
-              audience: params.audience || 'default'
+              audience: params.audience || 'default',
+              redirect_uri: params.redirect_uri
             });
             return [2 /*return*/, url + fragment];
         }
@@ -2902,7 +2903,8 @@ var Auth0Client = /** @class */ (function() {
                 audience: options.audience || this.options.audience,
                 client_id: this.options.client_id,
                 code_verifier: code_verifier,
-                code: codeResult.code
+                code: codeResult.code,
+                redirect_uri: params.redirect_uri
               })
             ];
           case 4:
@@ -3051,7 +3053,8 @@ var Auth0Client = /** @class */ (function() {
                 audience: this.options.audience,
                 client_id: this.options.client_id,
                 code_verifier: transaction.code_verifier,
-                code: code
+                code: code,
+                redirect_uri: transaction.redirect_uri
               })
             ];
           case 1:
@@ -3184,7 +3187,8 @@ var Auth0Client = /** @class */ (function() {
                 audience: options.audience || this.options.audience,
                 client_id: this.options.client_id,
                 code_verifier: code_verifier,
-                code: codeResult.code
+                code: codeResult.code,
+                redirect_uri: params.redirect_uri
               })
             ];
           case 5:

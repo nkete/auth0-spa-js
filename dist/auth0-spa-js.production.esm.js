@@ -2418,7 +2418,7 @@ var er = $n.getAll,
     return (
       (e.prototype._url = function(e) {
         var t = encodeURIComponent(
-          btoa(JSON.stringify({ name: 'auth0-spa-js', version: '1.6.2' }))
+          btoa(JSON.stringify({ name: 'auth0-spa-js', version: '1.6.3' }))
         );
         return '' + this.domainUrl + e + '&auth0Client=' + t;
       }),
@@ -2481,7 +2481,8 @@ var er = $n.getAll,
                       code_verifier: u,
                       appState: r,
                       scope: d.scope,
-                      audience: d.audience || 'default'
+                      audience: d.audience || 'default',
+                      redirect_uri: d.redirect_uri
                     }),
                     [2, p + l]
                   );
@@ -2535,7 +2536,8 @@ var er = $n.getAll,
                       audience: e.audience || this.options.audience,
                       client_id: this.options.client_id,
                       code_verifier: s,
-                      code: h.code
+                      code: h.code,
+                      redirect_uri: d.redirect_uri
                     })
                   ];
                 case 4:
@@ -2653,7 +2655,8 @@ var er = $n.getAll,
                         audience: this.options.audience,
                         client_id: this.options.client_id,
                         code_verifier: s.code_verifier,
-                        code: a
+                        code: a,
+                        redirect_uri: s.redirect_uri
                       })
                     ]
                   );
@@ -2763,7 +2766,8 @@ var er = $n.getAll,
                       audience: e.audience || this.options.audience,
                       client_id: this.options.client_id,
                       code_verifier: l,
-                      code: m.code
+                      code: m.code,
+                      redirect_uri: v.redirect_uri
                     })
                   ];
                 case 5:
