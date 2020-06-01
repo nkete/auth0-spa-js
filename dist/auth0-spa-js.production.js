@@ -2824,14 +2824,16 @@
                       {
                         ok: !1,
                         status: o.status,
-                        error: 'too_many_requests',
-                        error_description: 'Global rate limit exceeded'
+                        json: {
+                          error: 'too_many_requests',
+                          error_description: 'Global rate limit exceeded'
+                        }
                       }
                     ]
                   : ((c = { ok: o.ok }), [4, o.json()])
               );
             case 3:
-              return [2, ((c.json = i.sent()), c)];
+              return [2, ((c.json = i.sent()), (c.status = o.status), c)];
           }
           var s, u, l, f;
         });

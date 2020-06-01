@@ -4247,8 +4247,10 @@
                 {
                   ok: false,
                   status: response.status,
-                  error: 'too_many_requests',
-                  error_description: 'Global rate limit exceeded'
+                  json: {
+                    error: 'too_many_requests',
+                    error_description: 'Global rate limit exceeded'
+                  }
                 }
               ];
             }
@@ -4257,7 +4259,10 @@
             };
             return [4 /*yield*/, response.json()];
           case 3:
-            return [2 /*return*/, ((_a.json = _b.sent()), _a)];
+            return [
+              2 /*return*/,
+              ((_a.json = _b.sent()), (_a.status = response.status), _a)
+            ];
         }
       });
     });
