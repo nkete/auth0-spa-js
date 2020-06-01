@@ -3475,12 +3475,16 @@ var switchFetch = function (url, opts, timeout, worker) {
           return [4 /*yield*/, fetch(url, opts)];
         case 2:
           response = _b.sent();
+          console.log('>>> switchFetch::response::', response);
           _a = {
             ok: response.ok
           };
           return [4 /*yield*/, response.json()];
         case 3:
-          return [2 /*return*/, ((_a.json = _b.sent()), _a)];
+          return [
+            2 /*return*/,
+            ((_a.json = _b.sent()), (_a.status = response.status), _a)
+          ];
       }
     });
   });
@@ -3514,6 +3518,8 @@ var getJSON = function (url, timeout, options, worker) {
       error_description,
       success,
       ok,
+      status,
+      e_2,
       errorMessage,
       e;
     return __generator(this, function (_b) {
@@ -3546,12 +3552,20 @@ var getJSON = function (url, timeout, options, worker) {
           if (fetchError) {
             throw fetchError;
           }
+          console.log('> auth0 json::', response);
           (_a = response.json),
             (error = _a.error),
             (error_description = _a.error_description),
             (success = __rest(_a, ['error', 'error_description'])),
-            (ok = response.ok);
+            (ok = response.ok),
+            (status = response.status);
+          console.log('> auth0 json::', error, status);
           if (!ok) {
+            if (status === 429) {
+              e_2 = new Error('too_many_requests');
+              e_2.error_description = 'Too Many Requests';
+              throw e_2;
+            }
             errorMessage =
               error_description || 'HTTP error. Unable to fetch ' + url;
             e = new Error(errorMessage);
@@ -4652,6 +4666,7 @@ var Auth0Client = /** @class */ (function () {
             ];
           case 2:
             _c.sent();
+            console.log('>> get token silently');
             if (!(this.options.useRefreshTokens && !options.audience))
               return [3 /*break*/, 4];
             return [
@@ -4677,6 +4692,7 @@ var Auth0Client = /** @class */ (function () {
             return [2 /*return*/, authResult.access_token];
           case 7:
             e_1 = _c.sent();
+            console.log('>> getTokenSilently error: ', e_1);
             throw e_1;
           case 8:
             return [4 /*yield*/, lock.releaseLock(GET_TOKEN_SILENTLY_LOCK_KEY)];
@@ -4835,6 +4851,7 @@ var Auth0Client = /** @class */ (function () {
                 this.options.redirect_uri ||
                 window.location.origin
             );
+            console.log('>> get from iFrame');
             url = this._authorizeUrl(
               __assign(__assign({}, params), {
                 prompt: 'none',
@@ -4862,6 +4879,7 @@ var Auth0Client = /** @class */ (function () {
                 'ignoreCache',
                 'timeoutInSeconds'
               ]));
+            console.log('>> getFromIframe::oauthToken');
             return [
               4 /*yield*/,
               oauthToken(

@@ -222,6 +222,9 @@ const switchFetch = async (url, opts, timeout, worker) => {
     return sendMessage({ url, timeout, ...opts }, worker);
   } else {
     const response = await fetch(url, opts);
+
+    console.log('>>> switchFetch::response::', response);
+
     return {
       ok: response.ok,
       json: await response.json(),
@@ -277,11 +280,14 @@ const getJSON = async (url, timeout, options, worker) => {
     throw fetchError;
   }
 
+  console.log('> auth0 json::', response);
   const {
     json: { error, error_description, ...success },
     ok,
     status
   } = response;
+
+  console.log('> auth0 json::', error, status);
 
   if (!ok) {
     if (status === 429) {

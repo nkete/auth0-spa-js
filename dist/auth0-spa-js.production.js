@@ -2815,9 +2815,14 @@
                 }))
               ];
             case 2:
-              return (o = i.sent()), (c = { ok: o.ok }), [4, o.json()];
+              return (
+                (o = i.sent()),
+                console.log('>>> switchFetch::response::', o),
+                (c = { ok: o.ok }),
+                [4, o.json()]
+              );
             case 3:
-              return [2, ((c.json = i.sent()), c)];
+              return [2, ((c.json = i.sent()), (c.status = o.status), c)];
           }
           var s, u, l, f;
         });
@@ -2839,7 +2844,7 @@
     },
     Er = function (e, t, n, a) {
       return o(void 0, void 0, void 0, function () {
-        var o, c, s, u, l, f, d, p, h, y;
+        var o, c, s, u, l, f, d, p, h, y, v, m, b;
         return i(this, function (i) {
           switch (i.label) {
             case 0:
@@ -2858,18 +2863,29 @@
             case 6:
               if (o) throw o;
               if (
-                ((l = c.json),
+                (console.log('> auth0 json::', c),
+                (l = c.json),
                 (f = l.error),
                 (d = l.error_description),
                 (p = r(l, ['error', 'error_description'])),
-                !c.ok)
-              )
+                (h = c.ok),
+                (y = c.status),
+                console.log('> auth0 json::', f, y),
+                !h)
+              ) {
+                if (429 === y)
+                  throw (
+                    (((v = new Error('too_many_requests')).error_description =
+                      'Too Many Requests'),
+                    v)
+                  );
                 throw (
-                  ((h = d || 'HTTP error. Unable to fetch ' + e),
-                  ((y = new Error(h)).error = f || 'request_error'),
-                  (y.error_description = h),
-                  y)
+                  ((m = d || 'HTTP error. Unable to fetch ' + e),
+                  ((b = new Error(m)).error = f || 'request_error'),
+                  (b.error_description = m),
+                  b)
                 );
+              }
               return [2, p];
           }
         });
@@ -3735,7 +3751,7 @@
           return (
             void 0 === e && (e = {}),
             o(this, void 0, void 0, function () {
-              var t, o, a, c, s, u;
+              var t, o, a, c, s, u, l;
               return i(this, function (i) {
                 switch (i.label) {
                   case 0:
@@ -3768,6 +3784,7 @@
                   case 2:
                     return (
                       i.sent(),
+                      console.log('>> get token silently'),
                       !this.options.useRefreshTokens || e.audience
                         ? [3, 4]
                         : [4, this._getTokenUsingRefreshToken(a)]
@@ -3788,7 +3805,11 @@
                       [2, s.access_token]
                     );
                   case 7:
-                    throw i.sent();
+                    throw (
+                      ((l = i.sent()),
+                      console.log('>> getTokenSilently error: ', l),
+                      l)
+                    );
                   case 8:
                     return [4, io.releaseLock('auth0.lock.getTokenSilently')];
                   case 9:
@@ -3883,6 +3904,7 @@
                         this.options.redirect_uri ||
                         window.location.origin
                     )),
+                    console.log('>> get from iFrame'),
                     (l = this._authorizeUrl(
                       n(n({}, u), {
                         prompt: 'none',
@@ -3910,6 +3932,7 @@
                       'ignoreCache',
                       'timeoutInSeconds'
                     ])),
+                    console.log('>> getFromIframe::oauthToken'),
                     [
                       4,
                       Ar(

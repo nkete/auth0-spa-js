@@ -60,26 +60,26 @@ function o(e, t, n, r) {
   return new (n || (n = Promise))(function (o, i) {
     function a(e) {
       try {
-        u(r.next(e));
+        s(r.next(e));
       } catch (e) {
         i(e);
       }
     }
     function c(e) {
       try {
-        u(r.throw(e));
+        s(r.throw(e));
       } catch (e) {
         i(e);
       }
     }
-    function u(e) {
+    function s(e) {
       e.done
         ? o(e.value)
         : new n(function (t) {
             t(e.value);
           }).then(a, c);
     }
-    u((r = r.apply(e, t || [])).next());
+    s((r = r.apply(e, t || [])).next());
   });
 }
 function i(e, t) {
@@ -186,17 +186,17 @@ function c(e) {
     ? e.default
     : e;
 }
-function u(e, t) {
+function s(e, t) {
   return e((t = { exports: {} }), t.exports), t.exports;
 }
-var s = function (e) {
+var u = function (e) {
     return e && e.Math == Math && e;
   },
   l =
-    s('object' == typeof globalThis && globalThis) ||
-    s('object' == typeof window && window) ||
-    s('object' == typeof self && self) ||
-    s('object' == typeof a && a) ||
+    u('object' == typeof globalThis && globalThis) ||
+    u('object' == typeof window && window) ||
+    u('object' == typeof self && self) ||
+    u('object' == typeof a && a) ||
     Function('return this')(),
   f = function (e) {
     try {
@@ -344,7 +344,7 @@ var X,
   z = G.inspectSource,
   Y = l.WeakMap,
   J = 'function' == typeof Y && /native code/.test(z(Y)),
-  N = u(function (e) {
+  N = s(function (e) {
     (e.exports = function (e, t) {
       return G[e] || (G[e] = void 0 !== t ? t : {});
     })('versions', []).push({
@@ -410,19 +410,19 @@ var ie,
       };
     }
   },
-  ce = u(function (e) {
+  ce = s(function (e) {
     var t = ae.get,
       n = ae.enforce,
       r = String(String).split('String');
     (e.exports = function (e, t, o, i) {
       var a = !!i && !!i.unsafe,
         c = !!i && !!i.enumerable,
-        u = !!i && !!i.noTargetGet;
+        s = !!i && !!i.noTargetGet;
       'function' == typeof o &&
         ('string' != typeof t || O(o, 'name') || K(o, 'name', t),
         (n(o).source = r.join('string' == typeof t ? t : ''))),
         e !== l
-          ? (a ? !u && e[t] && (c = !0) : delete e[t],
+          ? (a ? !s && e[t] && (c = !0) : delete e[t],
             c ? (e[t] = o) : K(e, t, o))
           : c
           ? (e[t] = o)
@@ -431,14 +431,14 @@ var ie,
       return ('function' == typeof this && t(this).source) || z(this);
     });
   }),
-  ue = l,
-  se = function (e) {
+  se = l,
+  ue = function (e) {
     return 'function' == typeof e ? e : void 0;
   },
   le = function (e, t) {
     return arguments.length < 2
-      ? se(ue[e]) || se(l[e])
-      : (ue[e] && ue[e][t]) || (l[e] && l[e][t]);
+      ? ue(se[e]) || ue(l[e])
+      : (se[e] && se[e][t]) || (l[e] && l[e][t]);
   },
   fe = Math.ceil,
   de = Math.floor,
@@ -529,14 +529,14 @@ var ie,
       i,
       a,
       c = e.target,
-      u = e.global,
-      s = e.stat;
-    if ((n = u ? l : s ? l[c] || U(c, {}) : (l[c] || {}).prototype))
+      s = e.global,
+      u = e.stat;
+    if ((n = s ? l : u ? l[c] || U(c, {}) : (l[c] || {}).prototype))
       for (r in t) {
         if (
           ((i = t[r]),
           (o = e.noTargetGet ? (a = Ce(n, r)) && a.value : n[r]),
-          !Re(u ? r : c + (s ? '.' : '#') + r, e.forced) && void 0 !== o)
+          !Re(s ? r : c + (u ? '.' : '#') + r, e.forced) && void 0 !== o)
         ) {
           if (typeof i == typeof o) continue;
           xe(i, o);
@@ -666,22 +666,22 @@ var Qe,
   ct = function (e) {
     return Object(S(e));
   },
-  ut = !f(function () {
+  st = !f(function () {
     function e() {}
     return (
       (e.prototype.constructor = null),
       Object.getPrototypeOf(new e()) !== e.prototype
     );
   }),
-  st = H('IE_PROTO'),
+  ut = H('IE_PROTO'),
   lt = Object.prototype,
-  ft = ut
+  ft = st
     ? Object.getPrototypeOf
     : function (e) {
         return (
           (e = ct(e)),
-          O(e, st)
-            ? e[st]
+          O(e, ut)
+            ? e[ut]
             : 'function' == typeof e.constructor && e instanceof e.constructor
             ? e.constructor.prototype
             : e instanceof Object
@@ -806,8 +806,8 @@ var kt =
       (e.prototype = kt(jt, { next: v(1, n) })), Ot(e, r, !1), (xt[r] = Et);
     })(n, t, r);
     var c,
-      u,
       s,
+      u,
       l = function (e) {
         if (e === o && y) return y;
         if (!At && e in p) return p[e];
@@ -849,16 +849,16 @@ var kt =
       o)
     )
       if (
-        ((u = {
+        ((s = {
           values: l('values'),
           keys: i ? y : l('keys'),
           entries: l('entries')
         }),
         a)
       )
-        for (s in u) (At || d || !(s in p)) && ce(p, s, u[s]);
-      else Ke({ target: t, proto: !0, forced: At || d }, u);
-    return u;
+        for (u in s) (At || d || !(u in p)) && ce(p, u, s[u]);
+      else Ke({ target: t, proto: !0, forced: At || d }, s);
+    return s;
   },
   Kt = at.charAt,
   Ut = ae.set,
@@ -981,35 +981,35 @@ Ke(
         i,
         a,
         c = ct(e),
-        u = 'function' == typeof this ? this : Array,
-        s = arguments.length,
-        l = s > 1 ? arguments[1] : void 0,
+        s = 'function' == typeof this ? this : Array,
+        u = arguments.length,
+        l = u > 1 ? arguments[1] : void 0,
         f = void 0 !== l,
         d = qt(c),
         p = 0;
       if (
-        (f && (l = nt(l, s > 2 ? arguments[2] : void 0, 2)),
-        null == d || (u == Array && Ft(d)))
+        (f && (l = nt(l, u > 2 ? arguments[2] : void 0, 2)),
+        null == d || (s == Array && Ft(d)))
       )
-        for (n = new u((t = ye(c.length))); t > p; p++)
+        for (n = new s((t = ye(c.length))); t > p; p++)
           (a = f ? l(c[p], p) : c[p]), zt(n, p, a);
       else
-        for (i = (o = d.call(c)).next, n = new u(); !(r = i.call(o)).done; p++)
+        for (i = (o = d.call(c)).next, n = new s(); !(r = i.call(o)).done; p++)
           (a = f ? Pt(o, l, [r.value, p], !0) : r.value), zt(n, p, a);
       return (n.length = p), n;
     }
   }
 );
-ue.Array.from;
+se.Array.from;
 var rn,
   on = 'undefined' != typeof ArrayBuffer && 'undefined' != typeof DataView,
   an = C.f,
   cn = l.Int8Array,
-  un = cn && cn.prototype,
-  sn = l.Uint8ClampedArray,
-  ln = sn && sn.prototype,
+  sn = cn && cn.prototype,
+  un = l.Uint8ClampedArray,
+  ln = un && un.prototype,
   fn = cn && ft(cn),
-  dn = un && ft(un),
+  dn = sn && ft(sn),
   pn = Object.prototype,
   hn = pn.isPrototypeOf,
   yn = Fe('toStringTag'),
@@ -1071,7 +1071,7 @@ var wn = function (e) {
           var o = l[r];
           o && O(o.prototype, e) && delete o.prototype[e];
         }
-      (dn[e] && !n) || ce(dn, e, n ? t : (mn && un[e]) || t);
+      (dn[e] && !n) || ce(dn, e, n ? t : (mn && sn[e]) || t);
     }
   },
   kn = Fe('species'),
@@ -1153,7 +1153,7 @@ ot('String', 'includes');
 var Cn = !f(function () {
     return Object.isExtensible(Object.preventExtensions({}));
   }),
-  Kn = u(function (e) {
+  Kn = s(function (e) {
     var t = C.f,
       n = B('meta'),
       r = 0,
@@ -1198,15 +1198,15 @@ var Cn = !f(function () {
     Kn.fastKey,
     Kn.getWeakData,
     Kn.onFreeze,
-    u(function (e) {
+    s(function (e) {
       var t = function (e, t) {
         (this.stopped = e), (this.result = t);
       };
       (e.exports = function (e, n, r, o, i) {
         var a,
           c,
-          u,
           s,
+          u,
           l,
           f,
           d,
@@ -1216,9 +1216,9 @@ var Cn = !f(function () {
           if ('function' != typeof (c = qt(e)))
             throw TypeError('Target is not iterable');
           if (Ft(c)) {
-            for (u = 0, s = ye(e.length); s > u; u++)
+            for (s = 0, u = ye(e.length); u > s; s++)
               if (
-                (l = o ? p(Z((d = e[u]))[0], d[1]) : p(e[u])) &&
+                (l = o ? p(Z((d = e[s]))[0], d[1]) : p(e[s])) &&
                 l instanceof t
               )
                 return l;
@@ -1259,8 +1259,8 @@ var Cn = !f(function () {
         i = r ? 'set' : 'add',
         a = l[e],
         c = a && a.prototype,
-        u = a,
-        s = {},
+        s = a,
+        u = {},
         d = function (e) {
           var t = c[e];
           ce(
@@ -1300,9 +1300,9 @@ var Cn = !f(function () {
             )
         )
       )
-        (u = n.getConstructor(t, e, r, i)), (Kn.REQUIRED = !0);
+        (s = n.getConstructor(t, e, r, i)), (Kn.REQUIRED = !0);
       else if (Re(e, !0)) {
-        var p = new u(),
+        var p = new s(),
           h = p[i](o ? {} : -0, 1) != p,
           y = f(function () {
             p.has(1);
@@ -1317,8 +1317,8 @@ var Cn = !f(function () {
               return !e.has(-0);
             });
         v ||
-          (((u = t(function (t, n) {
-            Gn(t, u, e);
+          (((s = t(function (t, n) {
+            Gn(t, s, e);
             var o = (function (e, t, n) {
               var r, o;
               return (
@@ -1330,18 +1330,18 @@ var Cn = !f(function () {
                   Lt(e, o),
                 e
               );
-            })(new a(), t, u);
+            })(new a(), t, s);
             return null != n && Un(n, o[i], o, r), o;
           })).prototype = c),
-          (c.constructor = u)),
+          (c.constructor = s)),
           (y || m) && (d('delete'), d('has'), r && d('get')),
           (m || h) && d(i),
           o && c.clear && delete c.clear;
       }
-      (s[e] = u),
-        Ke({ global: !0, forced: u != a }, s),
-        Ot(u, e),
-        o || n.setStrong(u, e, r);
+      (u[e] = s),
+        Ke({ global: !0, forced: s != a }, u),
+        Ot(s, e),
+        o || n.setStrong(s, e, r);
     })(
       'Set',
       function (e) {
@@ -1368,11 +1368,11 @@ var Cn = !f(function () {
               var r,
                 o,
                 a = i(e),
-                u = c(e, t);
+                s = c(e, t);
               return (
-                u
-                  ? (u.value = n)
-                  : ((a.last = u = {
+                s
+                  ? (s.value = n)
+                  : ((a.last = s = {
                       index: (o = Fn(t, !0)),
                       key: t,
                       value: n,
@@ -1380,10 +1380,10 @@ var Cn = !f(function () {
                       next: void 0,
                       removed: !1
                     }),
-                    a.first || (a.first = u),
-                    r && (r.next = u),
+                    a.first || (a.first = s),
+                    r && (r.next = s),
                     d ? a.size++ : e.size++,
-                    'F' !== o && (a.index[o] = u)),
+                    'F' !== o && (a.index[o] = s)),
                 e
               );
             },
@@ -1595,7 +1595,7 @@ for (var $n in Nn) {
           }
   }
 }
-ue.Set;
+se.Set;
 function rr(e) {
   var t = this.constructor;
   return this.then(
@@ -1626,7 +1626,7 @@ function cr(e) {
     (this._deferreds = []),
     pr(e, this);
 }
-function ur(e, t) {
+function sr(e, t) {
   for (; 3 === e._state; ) e = e._value;
   0 !== e._state
     ? ((e._handled = !0),
@@ -1639,12 +1639,12 @@ function ur(e, t) {
           } catch (e) {
             return void lr(t.promise, e);
           }
-          sr(t.promise, r);
-        } else (1 === e._state ? sr : lr)(t.promise, e._value);
+          ur(t.promise, r);
+        } else (1 === e._state ? ur : lr)(t.promise, e._value);
       }))
     : e._deferreds.push(t);
 }
-function sr(e, t) {
+function ur(e, t) {
   try {
     if (t === e)
       throw new TypeError('A promise cannot be resolved with itself.');
@@ -1676,7 +1676,7 @@ function fr(e) {
     cr._immediateFn(function () {
       e._handled || cr._unhandledRejectionFn(e._value);
     });
-  for (var t = 0, n = e._deferreds.length; t < n; t++) ur(e, e._deferreds[t]);
+  for (var t = 0, n = e._deferreds.length; t < n; t++) sr(e, e._deferreds[t]);
   e._deferreds = null;
 }
 function dr(e, t, n) {
@@ -1689,7 +1689,7 @@ function pr(e, t) {
   try {
     e(
       function (e) {
-        n || ((n = !0), sr(t, e));
+        n || ((n = !0), ur(t, e));
       },
       function (e) {
         n || ((n = !0), lr(t, e));
@@ -1705,7 +1705,7 @@ function pr(e, t) {
 }),
   (cr.prototype.then = function (e, t) {
     var n = new this.constructor(ar);
-    return ur(this, new dr(e, t, n)), n;
+    return sr(this, new dr(e, t, n)), n;
   }),
   (cr.prototype.finally = rr),
   (cr.all = function (e) {
@@ -1942,7 +1942,7 @@ var hr = (function () {
               }
             })(e, t, n || e);
     }
-    var u = (function () {
+    var s = (function () {
         function t() {
           e(this, t),
             Object.defineProperty(this, 'listeners', {
@@ -1998,7 +1998,7 @@ var hr = (function () {
           t
         );
       })(),
-      s = (function (t) {
+      u = (function (t) {
         function a() {
           var t;
           return (
@@ -2007,7 +2007,7 @@ var hr = (function () {
               return !t || ('object' != typeof t && 'function' != typeof t)
                 ? i(e)
                 : t;
-            })(this, r(a).call(this))).listeners || u.call(i(t)),
+            })(this, r(a).call(this))).listeners || s.call(i(t)),
             Object.defineProperty(i(t), 'aborted', {
               value: !1,
               writable: !0,
@@ -2052,12 +2052,12 @@ var hr = (function () {
           ]),
           a
         );
-      })(u),
+      })(s),
       l = (function () {
         function t() {
           e(this, t),
             Object.defineProperty(this, 'signal', {
-              value: new s(),
+              value: new u(),
               writable: !0,
               configurable: !0
             });
@@ -2097,7 +2097,7 @@ var hr = (function () {
     'undefined' != typeof Symbol &&
       Symbol.toStringTag &&
       ((l.prototype[Symbol.toStringTag] = 'AbortController'),
-      (s.prototype[Symbol.toStringTag] = 'AbortSignal')),
+      (u.prototype[Symbol.toStringTag] = 'AbortSignal')),
       (function (e) {
         (function (e) {
           return e.__FORCE_INSTALL_ABORTCONTROLLER_POLYFILL
@@ -2108,10 +2108,10 @@ var hr = (function () {
             : ('function' == typeof e.Request &&
                 !e.Request.prototype.hasOwnProperty('signal')) ||
                 !e.AbortController;
-        })(e) && ((e.AbortController = l), (e.AbortSignal = s));
+        })(e) && ((e.AbortController = l), (e.AbortSignal = u));
       })('undefined' != typeof self ? self : a);
   })();
-var yr = u(function (e, t) {
+var yr = s(function (e, t) {
   Object.defineProperty(t, '__esModule', { value: !0 });
   var n = (function () {
     function e() {
@@ -2154,33 +2154,33 @@ var yr = u(function (e, t) {
 });
 c(yr);
 var vr = c(
-  u(function (e, t) {
+  s(function (e, t) {
     var n =
         (a && a.__awaiter) ||
         function (e, t, n, r) {
           return new (n || (n = Promise))(function (o, i) {
             function a(e) {
               try {
-                u(r.next(e));
+                s(r.next(e));
               } catch (e) {
                 i(e);
               }
             }
             function c(e) {
               try {
-                u(r.throw(e));
+                s(r.throw(e));
               } catch (e) {
                 i(e);
               }
             }
-            function u(e) {
+            function s(e) {
               e.done
                 ? o(e.value)
                 : new n(function (t) {
                     t(e.value);
                   }).then(a, c);
             }
-            u((r = r.apply(e, t || [])).next());
+            s((r = r.apply(e, t || [])).next());
           });
         },
       r =
@@ -2317,21 +2317,21 @@ var vr = c(
           return (
             void 0 === a && (a = 5e3),
             n(this, void 0, void 0, function () {
-              var n, c, u, s, l, f;
+              var n, c, s, u, l, f;
               return r(this, function (r) {
                 switch (r.label) {
                   case 0:
                     (n = Date.now() + i(4)),
                       (c = Date.now() + a),
-                      (u = 'browser-tabs-lock-key-' + t),
-                      (s = window.localStorage),
+                      (s = 'browser-tabs-lock-key-' + t),
+                      (u = window.localStorage),
                       (r.label = 1);
                   case 1:
                     return Date.now() < c ? [4, o(30)] : [3, 8];
                   case 2:
                     return (
                       r.sent(),
-                      null !== s.getItem(u)
+                      null !== u.getItem(s)
                         ? [3, 5]
                         : ((l = this.id + '-' + t + '-' + n),
                           [4, o(Math.floor(25 * Math.random()))])
@@ -2339,8 +2339,8 @@ var vr = c(
                   case 3:
                     return (
                       r.sent(),
-                      s.setItem(
-                        u,
+                      u.setItem(
+                        s,
                         JSON.stringify({
                           id: this.id,
                           iat: n,
@@ -2354,11 +2354,11 @@ var vr = c(
                   case 4:
                     return (
                       r.sent(),
-                      null !== (f = s.getItem(u)) &&
+                      null !== (f = u.getItem(s)) &&
                       (f = JSON.parse(f)).id === this.id &&
                       f.iat === n
                         ? (this.acquiredIatSet.add(n),
-                          this.refreshLockWhileAcquired(u, n),
+                          this.refreshLockWhileAcquired(s, n),
                           [2, !0])
                         : [3, 7]
                     );
@@ -2550,7 +2550,7 @@ var mr = { timeoutInSeconds: 60 },
           c = setTimeout(function () {
             o(br), a();
           }, 1e3 * n),
-          u = function (e) {
+          s = function (e) {
             if (
               e.origin == t &&
               e.data &&
@@ -2560,11 +2560,11 @@ var mr = { timeoutInSeconds: 60 },
               n && n.close(),
                 e.data.response.error ? o(e.data.response) : r(e.data.response),
                 clearTimeout(c),
-                window.removeEventListener('message', u, !1),
+                window.removeEventListener('message', s, !1),
                 setTimeout(a, 2e3);
             }
           };
-        window.addEventListener('message', u, !1),
+        window.addEventListener('message', s, !1),
           window.document.body.appendChild(i),
           i.setAttribute('src', e);
       })
@@ -2711,9 +2711,9 @@ var mr = { timeoutInSeconds: 60 },
           case 1:
             return [
               4,
-              ((u = e),
-              (s = t),
-              (s = s || {}),
+              ((s = e),
+              (u = t),
+              (u = u || {}),
               new Promise(function (e, t) {
                 var n = new XMLHttpRequest(),
                   r = [],
@@ -2751,7 +2751,7 @@ var mr = { timeoutInSeconds: 60 },
                       }
                     };
                   };
-                for (var c in (n.open(s.method || 'get', u, !0),
+                for (var c in (n.open(u.method || 'get', s, !0),
                 (n.onload = function () {
                   n
                     .getAllResponseHeaders()
@@ -2767,18 +2767,23 @@ var mr = { timeoutInSeconds: 60 },
                     e(a());
                 }),
                 (n.onerror = t),
-                (n.withCredentials = 'include' == s.credentials),
-                s.headers))
-                  n.setRequestHeader(c, s.headers[c]);
-                n.send(s.body || null);
+                (n.withCredentials = 'include' == u.credentials),
+                u.headers))
+                  n.setRequestHeader(c, u.headers[c]);
+                n.send(u.body || null);
               }))
             ];
           case 2:
-            return (o = i.sent()), (c = { ok: o.ok }), [4, o.json()];
+            return (
+              (o = i.sent()),
+              console.log('>>> switchFetch::response::', o),
+              (c = { ok: o.ok }),
+              [4, o.json()]
+            );
           case 3:
-            return [2, ((c.json = i.sent()), c)];
+            return [2, ((c.json = i.sent()), (c.status = o.status), c)];
         }
-        var u, s, l, f;
+        var s, u, l, f;
       });
     });
   },
@@ -2798,37 +2803,48 @@ var mr = { timeoutInSeconds: 60 },
   },
   Er = function (e, t, n, a) {
     return o(void 0, void 0, void 0, function () {
-      var o, c, u, s, l, f, d, p, h, y;
+      var o, c, s, u, l, f, d, p, h, y, v, m, b;
       return i(this, function (i) {
         switch (i.label) {
           case 0:
-            (u = 0), (i.label = 1);
+            (s = 0), (i.label = 1);
           case 1:
-            if (!(u < 3)) return [3, 6];
+            if (!(s < 3)) return [3, 6];
             i.label = 2;
           case 2:
             return i.trys.push([2, 4, , 5]), [4, jr(e, n, a, t)];
           case 3:
             return (c = i.sent()), (o = null), [3, 6];
           case 4:
-            return (s = i.sent()), (o = s), [3, 5];
+            return (u = i.sent()), (o = u), [3, 5];
           case 5:
-            return u++, [3, 1];
+            return s++, [3, 1];
           case 6:
             if (o) throw o;
             if (
-              ((l = c.json),
+              (console.log('> auth0 json::', c),
+              (l = c.json),
               (f = l.error),
               (d = l.error_description),
               (p = r(l, ['error', 'error_description'])),
-              !c.ok)
-            )
+              (h = c.ok),
+              (y = c.status),
+              console.log('> auth0 json::', f, y),
+              !h)
+            ) {
+              if (429 === y)
+                throw (
+                  (((v = new Error('too_many_requests')).error_description =
+                    'Too Many Requests'),
+                  v)
+                );
               throw (
-                ((h = d || 'HTTP error. Unable to fetch ' + e),
-                ((y = new Error(h)).error = f || 'request_error'),
-                (y.error_description = h),
-                y)
+                ((m = d || 'HTTP error. Unable to fetch ' + e),
+                ((b = new Error(m)).error = f || 'request_error'),
+                (b.error_description = m),
+                b)
               );
+            }
             return [2, p];
         }
       });
@@ -2955,7 +2971,7 @@ var mr = { timeoutInSeconds: 60 },
       };
     })();
   },
-  Pr = u(function (e, t) {
+  Pr = s(function (e, t) {
     var n =
       (a && a.__assign) ||
       function () {
@@ -3021,7 +3037,7 @@ var mr = { timeoutInSeconds: 60 },
     function c() {
       return i(document.cookie);
     }
-    function u(e, t, r) {
+    function s(e, t, r) {
       document.cookie = o(e, t, n({ path: '/' }, r));
     }
     (t.__esModule = !0),
@@ -3031,9 +3047,9 @@ var mr = { timeoutInSeconds: 60 },
       (t.get = function (e) {
         return c()[e];
       }),
-      (t.set = u),
+      (t.set = s),
       (t.remove = function (e, t) {
-        u(e, '', n(n({}, t), { expires: -1 }));
+        s(e, '', n(n({}, t), { expires: -1 }));
       });
   });
 c(Pr);
@@ -3327,7 +3343,7 @@ var eo,
   co = function (e) {
     return ao[e];
   },
-  uo = (function () {
+  so = (function () {
     function e(e) {
       var t, n;
       if (
@@ -3385,7 +3401,7 @@ var eo,
       }),
       (e.prototype._getParams = function (e, t, o, i, a) {
         var c = this.options,
-          u =
+          s =
             (c.domain,
             c.leeway,
             c.useRefreshTokens,
@@ -3398,7 +3414,7 @@ var eo,
               'cacheLocation',
               'advancedOptions'
             ]));
-        return n(n(n({}, u), e), {
+        return n(n(n({}, s), e), {
           scope: Rr(this.defaultScope, this.scope, e.scope),
           response_type: 'code',
           response_mode: 'query',
@@ -3429,7 +3445,7 @@ var eo,
         return (
           void 0 === e && (e = {}),
           o(this, void 0, void 0, function () {
-            var t, n, o, a, c, u, s, l, f, d, p;
+            var t, n, o, a, c, s, u, l, f, d, p;
             return i(this, function (i) {
               switch (i.label) {
                 case 0:
@@ -3439,19 +3455,19 @@ var eo,
                     (o = r(e, ['redirect_uri', 'appState'])),
                     (a = _r(Sr())),
                     (c = _r(Sr())),
-                    (u = Sr()),
-                    [4, Tr(u)]
+                    (s = Sr()),
+                    [4, Tr(s)]
                   );
                 case 1:
                   return (
-                    (s = i.sent()),
-                    (l = Or(s)),
+                    (u = i.sent()),
+                    (l = Or(u)),
                     (f = e.fragment ? '#' + e.fragment : ''),
                     (d = this._getParams(o, a, c, l, t)),
                     (p = this._authorizeUrl(d)),
                     this.transactionManager.create(a, {
                       nonce: c,
-                      code_verifier: u,
+                      code_verifier: s,
                       appState: n,
                       scope: d.scope,
                       audience: d.audience || 'default',
@@ -3469,7 +3485,7 @@ var eo,
           void 0 === e && (e = {}),
           void 0 === t && (t = {}),
           o(this, void 0, void 0, function () {
-            var o, a, c, u, s, l, f, d, p, h, y, v;
+            var o, a, c, s, u, l, f, d, p, h, y, v;
             return i(this, function (i) {
               switch (i.label) {
                 case 0:
@@ -3477,13 +3493,13 @@ var eo,
                     (o = r(e, [])),
                     (a = _r(Sr())),
                     (c = _r(Sr())),
-                    (u = Sr()),
-                    [4, Tr(u)]
+                    (s = Sr()),
+                    [4, Tr(s)]
                   );
                 case 1:
                   return (
-                    (s = i.sent()),
-                    (l = Or(s)),
+                    (u = i.sent()),
+                    (l = Or(u)),
                     (f = this._getParams(
                       o,
                       a,
@@ -3516,7 +3532,7 @@ var eo,
                       {
                         baseUrl: this.domainUrl,
                         client_id: this.options.client_id,
-                        code_verifier: u,
+                        code_verifier: s,
                         code: p.code,
                         grant_type: 'authorization_code',
                         redirect_uri: f.redirect_uri
@@ -3613,7 +3629,7 @@ var eo,
         return (
           void 0 === e && (e = window.location.href),
           o(this, void 0, void 0, function () {
-            var t, r, o, a, c, u, s, l, f, d, p;
+            var t, r, o, a, c, s, u, l, f, d, p;
             return i(this, function (i) {
               switch (i.label) {
                 case 0:
@@ -3639,41 +3655,41 @@ var eo,
                     (o = r.state),
                     (a = r.code),
                     (c = r.error),
-                    (u = r.error_description),
-                    !(s = this.transactionManager.get(o)))
+                    (s = r.error_description),
+                    !(u = this.transactionManager.get(o)))
                   )
                     throw new Error('Invalid state');
                   if (c)
                     throw (
                       (this.transactionManager.remove(o),
-                      new Qr(c, u, o, s.appState))
+                      new Qr(c, s, o, u.appState))
                     );
                   return (
                     this.transactionManager.remove(o),
                     (l = {
                       baseUrl: this.domainUrl,
                       client_id: this.options.client_id,
-                      code_verifier: s.code_verifier,
+                      code_verifier: u.code_verifier,
                       grant_type: 'authorization_code',
                       code: a
                     }),
-                    void 0 !== s.redirect_uri &&
-                      (l.redirect_uri = s.redirect_uri),
+                    void 0 !== u.redirect_uri &&
+                      (l.redirect_uri = u.redirect_uri),
                     [4, Lr(l, this.worker)]
                   );
                 case 1:
                   return (
                     (f = i.sent()),
-                    (d = this._verifyIdToken(f.id_token, s.nonce)),
+                    (d = this._verifyIdToken(f.id_token, u.nonce)),
                     (p = n(n({}, f), {
                       decodedToken: d,
-                      audience: s.audience,
-                      scope: s.scope,
+                      audience: u.audience,
+                      scope: u.scope,
                       client_id: this.options.client_id
                     })),
                     this.cache.save(p),
                     Jr('auth0.is.authenticated', !0, { daysUntilExpire: 1 }),
-                    [2, { appState: s.appState }]
+                    [2, { appState: u.appState }]
                   );
               }
             });
@@ -3684,7 +3700,7 @@ var eo,
         return (
           void 0 === e && (e = {}),
           o(this, void 0, void 0, function () {
-            var t, o, a, c, u, s;
+            var t, o, a, c, s, u, l;
             return i(this, function (i) {
               switch (i.label) {
                 case 0:
@@ -3711,27 +3727,32 @@ var eo,
                 case 2:
                   return (
                     i.sent(),
+                    console.log('>> get token silently'),
                     !this.options.useRefreshTokens || e.audience
                       ? [3, 4]
                       : [4, this._getTokenUsingRefreshToken(a)]
                   );
                 case 3:
-                  return (s = i.sent()), [3, 6];
+                  return (u = i.sent()), [3, 6];
                 case 4:
                   return [4, this._getTokenFromIFrame(a)];
                 case 5:
-                  (s = i.sent()), (i.label = 6);
+                  (u = i.sent()), (i.label = 6);
                 case 6:
                   return (
-                    (u = s),
+                    (s = u),
                     this.cache.save(
-                      n({ client_id: this.options.client_id }, u)
+                      n({ client_id: this.options.client_id }, s)
                     ),
                     Jr('auth0.is.authenticated', !0, { daysUntilExpire: 1 }),
-                    [2, u.access_token]
+                    [2, s.access_token]
                   );
                 case 7:
-                  throw i.sent();
+                  throw (
+                    ((l = i.sent()),
+                    console.log('>> getTokenSilently error: ', l),
+                    l)
+                  );
                 case 8:
                   return [4, io.releaseLock('auth0.lock.getTokenSilently')];
                 case 9:
@@ -3808,7 +3829,7 @@ var eo,
       }),
       (e.prototype._getTokenFromIFrame = function (e) {
         return o(this, void 0, void 0, function () {
-          var t, o, a, c, u, s, l, f, d, p, h, y;
+          var t, o, a, c, s, u, l, f, d, p, h, y;
           return i(this, function (i) {
             switch (i.label) {
               case 0:
@@ -3816,18 +3837,19 @@ var eo,
               case 1:
                 return (
                   (c = i.sent()),
-                  (u = Or(c)),
-                  (s = this._getParams(
+                  (s = Or(c)),
+                  (u = this._getParams(
                     e,
                     t,
                     o,
-                    u,
+                    s,
                     e.redirect_uri ||
                       this.options.redirect_uri ||
                       window.location.origin
                   )),
+                  console.log('>> get from iFrame'),
                   (l = this._authorizeUrl(
-                    n(n({}, s), {
+                    n(n({}, u), {
                       prompt: 'none',
                       response_mode: 'web_message'
                     })
@@ -3853,6 +3875,7 @@ var eo,
                     'ignoreCache',
                     'timeoutInSeconds'
                   ])),
+                  console.log('>> getFromIframe::oauthToken'),
                   [
                     4,
                     Lr(
@@ -3862,7 +3885,7 @@ var eo,
                         code_verifier: a,
                         code: d.code,
                         grant_type: 'authorization_code',
-                        redirect_uri: s.redirect_uri
+                        redirect_uri: u.redirect_uri
                       }),
                       this.worker
                     )
@@ -3876,8 +3899,8 @@ var eo,
                     2,
                     n(n({}, h), {
                       decodedToken: y,
-                      scope: s.scope,
-                      audience: s.audience || 'default'
+                      scope: u.scope,
+                      audience: u.audience || 'default'
                     })
                   ]
                 );
@@ -3887,7 +3910,7 @@ var eo,
       }),
       (e.prototype._getTokenUsingRefreshToken = function (e) {
         return o(this, void 0, void 0, function () {
-          var t, o, a, c, u, s;
+          var t, o, a, c, s, u;
           return i(this, function (i) {
             switch (i.label) {
               case 0:
@@ -3946,20 +3969,20 @@ var eo,
                 return (a = i.sent()), [3, 8];
               case 5:
                 return 'The web worker is missing the refresh token' !==
-                  (u = i.sent()).message
+                  (s = i.sent()).message
                   ? [3, 7]
                   : [4, this._getTokenFromIFrame(e)];
               case 6:
                 return [2, i.sent()];
               case 7:
-                throw u;
+                throw s;
               case 8:
                 return (
-                  (s = this._verifyIdToken(a.id_token)),
+                  (u = this._verifyIdToken(a.id_token)),
                   [
                     2,
                     n(n({}, a), {
-                      decodedToken: s,
+                      decodedToken: u,
                       scope: e.scope,
                       audience: e.audience || 'default'
                     })
@@ -3979,7 +4002,7 @@ export default function (e) {
       switch (r.label) {
         case 0:
           if (
-            'memory' === (t = new uo(e)).cacheLocation &&
+            'memory' === (t = new so(e)).cacheLocation &&
             !Yr('auth0.is.authenticated')
           )
             return [2, t];
@@ -3997,5 +4020,5 @@ export default function (e) {
     });
   });
 }
-export { uo as Auth0Client };
+export { so as Auth0Client };
 //# sourceMappingURL=auth0-spa-js.production.esm.js.map

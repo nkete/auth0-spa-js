@@ -522,6 +522,8 @@ export default class Auth0Client {
 
       await lock.acquireLock(GET_TOKEN_SILENTLY_LOCK_KEY, 5000);
 
+      console.log('>> get token silently');
+
       // Only get an access token using a refresh token if:
       // * refresh tokens are enabled
       // * no audience has been specified to getTokenSilently (we can only get a token for a new audience when using an iframe)
@@ -538,6 +540,7 @@ export default class Auth0Client {
 
       return authResult.access_token;
     } catch (e) {
+      console.log('>> getTokenSilently error: ', e);
       throw e;
     } finally {
       await lock.releaseLock(GET_TOKEN_SILENTLY_LOCK_KEY);
@@ -655,6 +658,8 @@ export default class Auth0Client {
         window.location.origin
     );
 
+    console.log('>> get from iFrame');
+
     const url = this._authorizeUrl({
       ...params,
       prompt: 'none',
@@ -678,6 +683,7 @@ export default class Auth0Client {
       ...customOptions
     } = options;
 
+    console.log('>> getFromIframe::oauthToken');
     const tokenResult = await oauthToken(
       {
         ...customOptions,
