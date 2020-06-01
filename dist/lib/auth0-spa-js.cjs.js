@@ -3476,15 +3476,23 @@ var switchFetch = function (url, opts, timeout, worker) {
         case 2:
           response = _b.sent();
           console.log('>>> switchFetch::response::', response);
+          if (response.status == 429) {
+            return [
+              2 /*return*/,
+              {
+                ok: false,
+                status: response.status,
+                error: 'too_many_requests',
+                error_description: 'Global rate limit exceeded'
+              }
+            ];
+          }
           _a = {
             ok: response.ok
           };
           return [4 /*yield*/, response.json()];
         case 3:
-          return [
-            2 /*return*/,
-            ((_a.json = _b.sent()), (_a.status = response.status), _a)
-          ];
+          return [2 /*return*/, ((_a.json = _b.sent()), _a)];
       }
     });
   });
