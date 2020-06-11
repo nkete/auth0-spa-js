@@ -4010,6 +4010,22 @@
    * @ignore
    */
   var DEFAULT_SCOPE = 'openid profile email';
+  /**
+   * A list of errors that can be issued by the authorization server which the
+   * user can recover from by signing in interactively.
+   * https://openid.net/specs/openid-connect-core-1_0.html#AuthError
+   * @ignore
+   */
+  var RECOVERABLE_ERRORS = [
+    'login_required',
+    'consent_required',
+    'interaction_required',
+    'account_selection_required',
+    // Strictly speaking the user can't recover from `access_denied` - but they
+    // can get more information about their access being denied by logging in
+    // interactively.
+    'access_denied'
+  ];
 
   var TIMEOUT_ERROR = { error: 'timeout', error_description: 'Timeout' };
   var createAbortController = function () {
@@ -4240,6 +4256,19 @@
             return [4 /*yield*/, fetch(url, opts)];
           case 2:
             response = _b.sent();
+            if (response.status == 429) {
+              return [
+                2 /*return*/,
+                {
+                  ok: false,
+                  status: response.status,
+                  json: {
+                    error: 'too_many_requests',
+                    error_description: 'Global rate limit exceeded'
+                  }
+                }
+              ];
+            }
             _a = {
               ok: response.ok
             };
@@ -4257,16 +4286,19 @@
     var controller = createAbortController();
     var signal = controller.signal;
     var fetchOptions = __assign(__assign({}, options), { signal: signal });
+    var timeoutId;
     // The promise will resolve with one of these two promises (the fetch or the timeout), whichever completes first.
     return Promise.race([
       switchFetch(url, fetchOptions, timeout, worker),
       new Promise(function (_, reject) {
-        setTimeout(function () {
+        timeoutId = setTimeout(function () {
           controller.abort();
           reject(new Error("Timeout when executing 'fetch'"));
         }, timeout);
       })
-    ]);
+    ]).finally(function () {
+      clearTimeout(timeoutId);
+    });
   };
   var getJSON = function (url, timeout, options, worker) {
     return __awaiter(void 0, void 0, void 0, function () {
@@ -4404,6 +4436,7 @@
   };
 
   var keyPrefix = '@@auth0spajs@@';
+  var DEFAULT_EXPIRY_ADJUSTMENT_SECONDS = 0;
   var createKey = function (e) {
     return keyPrefix + '::' + e.client_id + '::' + e.audience + '::' + e.scope;
   };
@@ -4413,8 +4446,7 @@
    */
   var wrapCacheEntry = function (entry) {
     var expiresInTime = Math.floor(Date.now() / 1000) + entry.expires_in;
-    var expirySeconds =
-      Math.min(expiresInTime, entry.decodedToken.claims.exp) - 60; // take off a small leeway
+    var expirySeconds = Math.min(expiresInTime, entry.decodedToken.claims.exp);
     return {
       body: entry,
       expiresAt: expirySeconds
@@ -4427,12 +4459,15 @@
       var payload = wrapCacheEntry(entry);
       window.localStorage.setItem(cacheKey, JSON.stringify(payload));
     };
-    LocalStorageCache.prototype.get = function (key) {
+    LocalStorageCache.prototype.get = function (key, expiryAdjustmentSeconds) {
+      if (expiryAdjustmentSeconds === void 0) {
+        expiryAdjustmentSeconds = DEFAULT_EXPIRY_ADJUSTMENT_SECONDS;
+      }
       var cacheKey = createKey(key);
       var payload = this.readJson(cacheKey);
       var nowSeconds = Math.floor(Date.now() / 1000);
       if (!payload) return;
-      if (payload.expiresAt < nowSeconds) {
+      if (payload.expiresAt - expiryAdjustmentSeconds < nowSeconds) {
         if (payload.body.refresh_token) {
           var newPayload = this.stripData(payload);
           this.writeJson(cacheKey, newPayload);
@@ -4501,14 +4536,17 @@
             var payload = wrapCacheEntry(entry);
             cache[key] = payload;
           },
-          get: function (key) {
+          get: function (key, expiryAdjustmentSeconds) {
+            if (expiryAdjustmentSeconds === void 0) {
+              expiryAdjustmentSeconds = DEFAULT_EXPIRY_ADJUSTMENT_SECONDS;
+            }
             var cacheKey = createKey(key);
             var wrappedEntry = cache[cacheKey];
             var nowSeconds = Math.floor(Date.now() / 1000);
             if (!wrappedEntry) {
               return;
             }
-            if (wrappedEntry.expiresAt < nowSeconds) {
+            if (wrappedEntry.expiresAt - expiryAdjustmentSeconds < nowSeconds) {
               if (wrappedEntry.body.refresh_token) {
                 wrappedEntry.body = {
                   refresh_token: wrappedEntry.body.refresh_token
@@ -4931,7 +4969,7 @@
     return AuthenticationError;
   })(GenericError);
 
-  var version = '1.8.2';
+  var version = '1.9.0';
 
   function decodeBase64(base64, enableUnicode) {
     var binaryString = atob(base64);
@@ -5055,15 +5093,17 @@
       }
     }
     Auth0Client.prototype._url = function (path) {
-      var telemetry = encodeURIComponent(
+      var auth0Client = encodeURIComponent(
         btoa(
-          JSON.stringify({
-            name: 'auth0-spa-js',
-            version: version
-          })
+          JSON.stringify(
+            this.options.auth0Client || {
+              name: 'auth0-spa-js',
+              version: version
+            }
+          )
         )
       );
-      return '' + this.domainUrl + path + '&auth0Client=' + telemetry;
+      return '' + this.domainUrl + path + '&auth0Client=' + auth0Client;
     };
     Auth0Client.prototype._getParams = function (
       authorizeOptions,
@@ -5076,12 +5116,14 @@
         domain = _a.domain,
         leeway = _a.leeway,
         useRefreshTokens = _a.useRefreshTokens,
+        auth0Client = _a.auth0Client,
         cacheLocation = _a.cacheLocation,
         advancedOptions = _a.advancedOptions,
         withoutDomain = __rest(_a, [
           'domain',
           'leeway',
           'useRefreshTokens',
+          'auth0Client',
           'cacheLocation',
           'advancedOptions'
         ]);
@@ -5471,6 +5513,52 @@
     };
     /**
      * ```js
+     * await auth0.checkSession();
+     * ```
+     *
+     * Check if the user is logged in using `getTokenSilently`. The difference
+     * with `getTokenSilently` is that this doesn't return a token, but it will
+     * pre-fill the token cache.
+     *
+     * It should be used for silently logging in the user when you instantiate the
+     * `Auth0Client` constructor. You should not need this if you are using the
+     * `createAuth0Client` factory.
+     *
+     * @param options
+     */
+    Auth0Client.prototype.checkSession = function (options) {
+      return __awaiter(this, void 0, void 0, function () {
+        var error_1;
+        return __generator(this, function (_a) {
+          switch (_a.label) {
+            case 0:
+              if (
+                this.cacheLocation === CACHE_LOCATION_MEMORY &&
+                !get$1('auth0.is.authenticated')
+              ) {
+                return [2 /*return*/];
+              }
+              _a.label = 1;
+            case 1:
+              _a.trys.push([1, 3, , 4]);
+              return [4 /*yield*/, this.getTokenSilently(options)];
+            case 2:
+              _a.sent();
+              return [3 /*break*/, 4];
+            case 3:
+              error_1 = _a.sent();
+              if (!RECOVERABLE_ERRORS.includes(error_1.error)) {
+                throw error_1;
+              }
+              return [3 /*break*/, 4];
+            case 4:
+              return [2 /*return*/];
+          }
+        });
+      });
+    };
+    /**
+     * ```js
      * const token = await auth0.getTokenSilently(options);
      * ```
      *
@@ -5523,11 +5611,14 @@
             case 1:
               _c.trys.push([1, 7, 8, 10]);
               if (!ignoreCache) {
-                cache = this.cache.get({
-                  scope: getTokenOptions.scope,
-                  audience: getTokenOptions.audience || 'default',
-                  client_id: this.options.client_id
-                });
+                cache = this.cache.get(
+                  {
+                    scope: getTokenOptions.scope,
+                    audience: getTokenOptions.audience || 'default',
+                    client_id: this.options.client_id
+                  },
+                  60 // get a new token if within 60 seconds of expiring
+                );
                 if (cache && cache.access_token) {
                   return [2 /*return*/, cache.access_token];
                 }
@@ -5872,31 +5963,14 @@
 
   function createAuth0Client(options) {
     return __awaiter(this, void 0, void 0, function () {
-      var auth0, error_1;
+      var auth0;
       return __generator(this, function (_a) {
         switch (_a.label) {
           case 0:
             auth0 = new Auth0Client(options);
-            if (
-              auth0.cacheLocation === CACHE_LOCATION_MEMORY &&
-              !get$1('auth0.is.authenticated')
-            ) {
-              return [2 /*return*/, auth0];
-            }
-            _a.label = 1;
+            return [4 /*yield*/, auth0.checkSession()];
           case 1:
-            _a.trys.push([1, 3, , 4]);
-            return [4 /*yield*/, auth0.getTokenSilently()];
-          case 2:
             _a.sent();
-            return [3 /*break*/, 4];
-          case 3:
-            error_1 = _a.sent();
-            if (error_1.error !== 'login_required') {
-              throw error_1;
-            }
-            return [3 /*break*/, 4];
-          case 4:
             return [2 /*return*/, auth0];
         }
       });

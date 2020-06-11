@@ -27,3 +27,10 @@ export declare const MISSING_REFRESH_TOKEN_ERROR_MESSAGE =
  * @ignore
  */
 export declare const DEFAULT_SCOPE = 'openid profile email';
+/**
+ * A list of errors that can be issued by the authorization server which the
+ * user can recover from by signing in interactively.
+ * https://openid.net/specs/openid-connect-core-1_0.html#AuthError
+ * @ignore
+ */
+export declare const RECOVERABLE_ERRORS: string[];

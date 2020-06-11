@@ -20,12 +20,12 @@ interface CacheEntry {
 }
 export interface ICache {
   save(entry: CacheEntry): void;
-  get(key: CacheKeyData): Partial<CacheEntry>;
+  get(key: CacheKeyData, expiryAdjustmentSeconds?: number): Partial<CacheEntry>;
   clear(): void;
 }
 export declare class LocalStorageCache implements ICache {
   save(entry: CacheEntry): void;
-  get(key: CacheKeyData): Partial<CacheEntry>;
+  get(key: CacheKeyData, expiryAdjustmentSeconds?: number): Partial<CacheEntry>;
   clear(): void;
   /**
    * Retrieves data from local storage and parses it into the correct format

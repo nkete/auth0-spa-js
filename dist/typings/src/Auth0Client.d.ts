@@ -106,6 +106,22 @@ export default class Auth0Client {
   handleRedirectCallback(url?: string): Promise<RedirectLoginResult>;
   /**
    * ```js
+   * await auth0.checkSession();
+   * ```
+   *
+   * Check if the user is logged in using `getTokenSilently`. The difference
+   * with `getTokenSilently` is that this doesn't return a token, but it will
+   * pre-fill the token cache.
+   *
+   * It should be used for silently logging in the user when you instantiate the
+   * `Auth0Client` constructor. You should not need this if you are using the
+   * `createAuth0Client` factory.
+   *
+   * @param options
+   */
+  checkSession(options?: GetTokenSilentlyOptions): Promise<void>;
+  /**
+   * ```js
    * const token = await auth0.getTokenSilently(options);
    * ```
    *
